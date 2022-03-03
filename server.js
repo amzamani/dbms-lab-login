@@ -3,6 +3,26 @@ const session = require('express-session')
 const path = require('path');
 
 
+const Promise = require('bluebird')
+const AppDAO = require('./dao')
+const createU = require('./createUser')
+const dao = new AppDAO('./database.sqlite3');
+const creatingU = new createU(dao)
+
+function forDBfunction(){
+  
+  creatingU.createTable()
+  .then((result)=>console.log('result :' + result))
+  .catch((err) => {
+    console.log('Error: ')
+    console.log(JSON.stringify(err))
+  })
+
+
+
+
+}
+forDBfunction();
 
 
 
@@ -45,6 +65,21 @@ app.post('/signup', (req, res) => {
     password: hash, // NOTE: in production we save hash of password
     email: req.body.email
   })
+  let data = {
+    
+    username: req.body.username,
+    firstname: req.body.firstname,
+    lastname: req.body.lastname,
+    email: req.body.email,
+    
+    password: req.body.password,
+     // NOTE: in production we save hash of password
+     createdAt: Date(),
+     updatedAt: Date()
+    
+  }
+  console.log(data);
+  creatingU.createNewUser(data.username, data.firstname, data.lastname, data.email, data.password, data.createdAt, data.updatedAt)
 });
 
 
@@ -80,6 +115,9 @@ app.get('/profile', async (req, res) => {
   }
   const user = await Users.findByPk(req.session.userId)
   res.render('profile', { user })
+  creatingU.getUserByUsername(req.session.userId)
+  .then((userdataa)=>console.log('getting user' + JSON.stringify(user)))
+  .catch((err)=>console.log(err))
 })
 
 app.get('/logout', (req, res) => {
@@ -92,3 +130,5 @@ db.sync()
     app.listen(PORT, () => console.log(`started on http://localhost:${PORT}`))
   })
   .catch(console.error)
+
+
