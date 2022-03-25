@@ -2,16 +2,16 @@ const Sequelize = require('sequelize')
 var sqlite3 = require('sqlite3').verbose();
 var db2 = new sqlite3.Database(':memory:');
 
-let stringCreate = `CREATE TABLE
-users
- (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
- username VARCHAR(30) NOT NULL UNIQUE,
- firstname VARCHAR(30),
- lastname VARCHAR(30),
- email VARCHAR(100),
- password VARCHAR(255) NOT NULL, createdAt DATETIME NOT NULL,
- updatedAt DATETIME NOT NULL);`
+// let stringCreate = `CREATE TABLE
+// users
+//  (
+// id INTEGER PRIMARY KEY AUTOINCREMENT,
+//  username VARCHAR(30) NOT NULL UNIQUE,
+//  firstname VARCHAR(30),
+//  lastname VARCHAR(30),
+//  email VARCHAR(100),
+//  password VARCHAR(255) NOT NULL, createdAt DATETIME NOT NULL,
+//  updatedAt DATETIME NOT NULL);`
 
 // let stringInUser = `INSERT INTO users (id,username, firstname, lastname, email, password, createdAt, updatedAt) VALUES (NULL,$1,$2,$3,$4,$5,$6,$7);
 // `
@@ -56,7 +56,7 @@ const Users = db.define('user', {
   },
   username: {
     type: Sequelize.DataTypes.STRING(30),
-    unique: true,
+    // unique: true,
     allowNull: false
   },
   firstname: {

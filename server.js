@@ -9,14 +9,14 @@ const createU = require('./createUser')
 const dao = new AppDAO('./database.sqlite3');
 const creatingU = new createU(dao)
 
-function forDBfunction(){
-  
+function forDBfunction() {
+
   creatingU.createTable()
-  .then((result)=>console.log('result :' + result))
-  .catch((err) => {
-    console.log('Error: ')
-    console.log(JSON.stringify(err))
-  })
+    .then((result) => console.log('result :' + result))
+    .catch((err) => {
+      console.log('Error: ')
+      console.log(JSON.stringify(err))
+    })
 
 
 
@@ -35,7 +35,7 @@ const app = express()
 const PORT = process.env.PORT || 4444
 
 app.set('view engine', 'hbs')
-app.use(express.urlencoded({extended: true}))
+app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 
@@ -55,32 +55,46 @@ app.post('/signup', (req, res) => {
   // bcrypt.hash('myPassword', 10, function(err, hash) {
   //   // Store hash in database
   // });
-  
-  bcrypt.hash(req.body.password, saltRounds, function (err,   hash) {
-  const user = Users.create({
 
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
-    username: req.body.username,
-    password: hash, // NOTE: in production we save hash of password
-    email: req.body.email
-  })
-  let data = {
-    
-    username: req.body.username,
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
-    email: req.body.email,
-    
-    password: req.body.password,
-     // NOTE: in production we save hash of password
-     createdAt: Date(),
-     updatedAt: Date()
-    
-  }
-  console.log(data);
-  creatingU.createNewUser(data.username, data.firstname, data.lastname, data.email, data.password, data.createdAt, data.updatedAt)
-});
+  bcrypt.hash(req.body.password, saltRounds, function (err, hash) {
+    const user = Users.create({
+
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
+      username: req.body.username,
+      password: hash, // NOTE: in production we save hash of password
+      email: req.body.email
+    })
+    let data = {
+
+      username: req.body.username,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
+      email: req.body.email,
+
+      password: req.body.password,
+      // NOTE: in production we save hash of password
+      createdAt: Date(),
+      updatedAt: Date()
+
+    }
+    console.log(data);
+    //check username exists or not
+    creatingU.getUserByUsername(data.username)
+      .then((userdataa) => {
+        console.log('getting usernamee' + userdataa)
+        // alert(userdataa);
+      })
+      .catch((err) => {
+        // res.render("profile")
+        alert(err);
+      })
+
+
+    creatingU.createNewUser(data.username, data.firstname, data.lastname, data.email, data.password, data.createdAt, data.updatedAt)
+      .then((result) => console.log(result))
+      .catch((err) => console.log(err))
+  });
 
 
   res.render("newuser")
@@ -96,12 +110,12 @@ app.get('/login', (req, res) => {
 
 
 app.post('/login', async (req, res) => {
-  const user = await Users.findOne({where: { username: req.body.username }})
+  const user = await Users.findOne({ where: { username: req.body.username } })
   if (!user) {
     return res.status(404).render('login', { error: 'No such username found' })
   }
   bcrypt.compare(req.body.password, user.password, function (err, result) {
-    if (result !==true ) {
+    if (result !== true) {
       return res.status(401).render('login', { error: 'Incorrect password' })
     }
     req.session.userId = user.id
@@ -113,11 +127,23 @@ app.get('/profile', async (req, res) => {
   if (!req.session.userId) {
     return res.redirect('/login')
   }
+  let user2 ={};
+  creatingU.getUserByUserId(req.session.userId)
+    .then((userdata2) => {
+      console.log('getting user' + userdata2)
+
+      console.log(JSON.stringify(userdata2))
+      user2 = userdata2;
+    }
+    )
+    .catch((err) => console.log(err))
+
+  console.log('render' + JSON.stringify(user2))
+  //change to sql
   const user = await Users.findByPk(req.session.userId)
+  console.log('sequlze' + user);
   res.render('profile', { user })
-  creatingU.getUserByUsername(req.session.userId)
-  .then((userdataa)=>console.log('getting user' + JSON.stringify(user)))
-  .catch((err)=>console.log(err))
+
 })
 
 app.get('/logout', (req, res) => {

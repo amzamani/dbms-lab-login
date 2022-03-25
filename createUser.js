@@ -26,16 +26,19 @@ class createUser {
       return this.dao.run(sql)
     }
 
-    //inserign into tables 
+    //inserting into tables 
 
-
-        createNewUser(id,username, firstname, lastname, email, password, createdAt, updatedAt) {
+    //todo : handle same username case 
+    //todo : handle hashed password
+        createNewUser(username, firstname, lastname, email, password, createdAt, updatedAt) {
         return this.dao.run(
           `INSERT INTO 
           users (
               id,username, firstname, lastname, email, password, createdAt, updatedAt)
                VALUES (NULL, ?, ?, ?,?, ?, ?, ?);`,
-          [id,username, firstname, lastname, email, password, createdAt, updatedAt])
+          [username, firstname, lastname, email, password, createdAt, updatedAt]).then((res)=>{
+            console.log('user entered into db sqlite');
+          })
         }
 
 
@@ -73,12 +76,25 @@ class createUser {
     //   }
 
       //select command on username
+      //change name
       getUserByUsername(id){
           return this.dao.get(
               `SELECT id, username, firstname, lastname, email, password, createdAt, updatedAt FROM users 
               AS user WHERE user.id = ?`,[id]
-          )
+
+          ).then((slctRes)=>{
+            console.log(slctRes);
+          })
       }
+      
+      //select command on userId
+      getUserByUserId(userId){
+        return this.dao.all(
+            `SELECT id, username, firstname, lastname, email, password, createdAt, updatedAt FROM users 
+            AS user WHERE user.id = ?`,[userId]
+        )
+    }
+    
 
       //select command
     //   getById(id) {
